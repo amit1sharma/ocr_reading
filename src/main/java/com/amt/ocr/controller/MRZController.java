@@ -3,7 +3,7 @@ package com.amt.ocr.controller;
 import com.amt.ocr.decode.MrzParser;
 import com.amt.ocr.decode.MrzRecord;
 import com.amt.ocr.processor.RecognizeText;
-import net.sourceforge.tess4j.Tesseract;
+//import net.sourceforge.tess4j.Tesseract;
 import org.opencv.core.Mat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +24,7 @@ import static org.opencv.imgcodecs.Imgcodecs.imread;
 @RequestMapping("/mrz")
 public class MRZController {
 
-    @RequestMapping("/read")
+/*    @RequestMapping("/read")
     @ResponseBody
 //    public String readMRZ(@RequestParam("imagePath") String imagePath){
     public String readMRZ(){
@@ -47,15 +47,14 @@ public class MRZController {
             e.printStackTrace();
         }
         return "";
-    }
+    }*/
 
-    @RequestMapping("/read1")
+    @RequestMapping("/loadImage")
     @ResponseBody
-    public String readMRZOpenCV(){
+    public String loadImage(){
         System.out.println(System.getProperty("java.library.path"));
         System.out.println("Start recognize text from image");
         long start = System.currentTimeMillis();
-//        System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
         // Read image
         Mat origin = imread(RecognizeText.SRC_PATH + "image.png");
 
@@ -67,51 +66,4 @@ public class MRZController {
         System.out.println("Done");
         return "time taken is : "+ (System.currentTimeMillis() - start);
     }
-
-
-    /*private boolean saveImage(RenderedImage bufferedImage,
-                              String formatName,
-                              File localOutputFile,
-                              int dpi) throws IOException {
-        boolean success;
-
-        if (formatName.equalsIgnoreCase("png"))
-        {
-            ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
-
-            ImageWriteParam writeParam = writer.getDefaultWriteParam();
-            ImageTypeSpecifier typeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_RGB);
-
-            IIOMetadata metadata = writer.getDefaultImageMetadata(typeSpecifier, writeParam);
-
-            final String pngMetadataFormatName = "javax_imageio_png_1.0";
-
-            // Convert dpi (dots per inch) to dots per meter
-            final double metersToInches = 39.3701;
-            int dotsPerMeter = (int) Math.round(dpi * metersToInches);
-
-            IIOMetadataNode pHYs_node = new IIOMetadataNode("pHYs");
-            pHYs_node.setAttribute("pixelsPerUnitXAxis", Integer.toString(dotsPerMeter));
-            pHYs_node.setAttribute("pixelsPerUnitYAxis", Integer.toString(dotsPerMeter));
-            pHYs_node.setAttribute("unitSpecifier", "meter");
-
-            IIOMetadataNode root = new IIOMetadataNode(pngMetadataFormatName);
-            root.appendChild(pHYs_node);
-
-            metadata.mergeTree(pngMetadataFormatName, root);
-
-            writer.setOutput(ImageIO.createImageOutputStream(localOutputFile));
-            writer.write(metadata, new IIOImage(bufferedImage, null, metadata), writeParam);
-            writer.dispose();
-
-            success = true;
-        }
-        else
-        {
-            success = ImageIO.write(bufferedImage, formatName, localOutputFile);
-        }
-
-        return success;
-    }*/
-
 }

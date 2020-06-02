@@ -16,8 +16,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
+//import net.sourceforge.tess4j.Tesseract;
+//import net.sourceforge.tess4j.TesseractException;
 
 
 /**
@@ -35,12 +35,12 @@ public class RecognizeText {
 	public static String TESS_DATA = "/home/yamraaj/Pictures/tessdata/tessdata-master/";
 	
 	// Create tess obj
-	public static Tesseract tesseract = new Tesseract();
+//	public static Tesseract tesseract = new Tesseract();
 	
 	// Load OPENCV
 	static {
 //		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		tesseract.setDatapath(TESS_DATA);
+//		tesseract.setDatapath(TESS_DATA);
 	}
 	
 	
@@ -59,12 +59,12 @@ public class RecognizeText {
 
 		//imwrite(SRC_PATH + "closeopen.png", gray);
 
-		try {
+		/*try {
 			// Recognize text with OCR
 			result = tesseract.doOCR(new File(SRC_PATH + image));
 		} catch (TesseractException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		return result;
 	}

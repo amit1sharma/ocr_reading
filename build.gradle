@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    compile group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.5.1'
+//    compile group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.5.1'
     compile (name: 'opencv-430', ext:'jar')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
