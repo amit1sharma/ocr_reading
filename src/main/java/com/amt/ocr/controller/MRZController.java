@@ -49,17 +49,19 @@ public class MRZController {
         return "";
     }*/
 
+    static {
+        System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
+    }
     @RequestMapping("/loadImage")
     @ResponseBody
     public String loadImage(){
         System.out.println(System.getProperty("java.library.path"));
-        System.out.println("Start recognize text from image");
         long start = System.currentTimeMillis();
         // Read image
         Mat origin = imread(RecognizeText.SRC_PATH + "image.png");
 
-        String result = new RecognizeText().extractTextFromImage(origin);
-        System.out.println(result);
+//        String result = new RecognizeText().extractTextFromImage(origin);
+//        System.out.println(result);
 
         System.out.println("Time");
         System.out.println(System.currentTimeMillis() - start);
