@@ -4,7 +4,10 @@ import com.amt.ocr.decode.MrzParser;
 import com.amt.ocr.decode.MrzRecord;
 import com.amt.ocr.processor.RecognizeText;
 //import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.Tesseract;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,7 +27,7 @@ import static org.opencv.imgcodecs.Imgcodecs.imread;
 @RequestMapping("/mrz")
 public class MRZController {
 
-/*    @RequestMapping("/read")
+    @RequestMapping("/read")
     @ResponseBody
 //    public String readMRZ(@RequestParam("imagePath") String imagePath){
     public String readMRZ(){
@@ -32,7 +35,7 @@ public class MRZController {
         try {
             tesseract.setDatapath("/home/yamraaj/Pictures/tessdata/tessdata-master/");
 //            tesseract.setConfigs();
-            tesseract.setLanguage("eng");
+            tesseract.setLanguage("ocrb");
 //            tesseract.setPageSegMode();
             try {
                 String text = tesseract.doOCR(new File("/home/yamraaj/Pictures/image.jpg"));
@@ -47,7 +50,7 @@ public class MRZController {
             e.printStackTrace();
         }
         return "";
-    }*/
+    }
 
     static {
         System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
@@ -59,9 +62,10 @@ public class MRZController {
         long start = System.currentTimeMillis();
         // Read image
         Mat origin = imread(RecognizeText.SRC_PATH + "image.png");
+//        Mat m = new Mat(5, 10, CvType.CV_8UC1, new Scalar(0));
 
 //        String result = new RecognizeText().extractTextFromImage(origin);
-//        System.out.println(result);
+//        System.out.println(result);imread_1
 
         System.out.println("Time");
         System.out.println(System.currentTimeMillis() - start);

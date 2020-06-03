@@ -15,14 +15,15 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
     flatDir {
-        dirs '/home/yamraaj/Documents/opencv/opencv_1/opencv/build/bin/'
+        dirs '/home/yamraaj/Documents/opencv/opencv_2/opencv/build/bin/'
+//        dirs '/usr/share/java/opencv4'
     }
+    mavenCentral()
 }
 
 dependencies {
-//    compile group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.5.1'
+    compile group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.5.1'
     compile (name: 'opencv-430', ext:'jar')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
