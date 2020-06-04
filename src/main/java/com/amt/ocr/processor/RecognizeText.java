@@ -28,7 +28,7 @@ import org.opencv.core.*;
  */
 public class RecognizeText {
 
-	public static String image = "image1.png";
+	public static String image = "picture3.jpg";
 	// Source path content images
 	public static String SRC_PATH = "/home/yamraaj/Pictures/";
 	public static String TARGET_PATH = "/home/yamraaj/Pictures/bgr2gray/";
@@ -59,7 +59,7 @@ public class RecognizeText {
 		return result;
 	}
 
-	public boolean extractMRZ(Mat originalImage) {
+	public String extractMRZ(Mat originalImage) {
 
 		Mat superOriginalImage = new Mat();
 		originalImage.copyTo(superOriginalImage);
@@ -100,23 +100,36 @@ public class RecognizeText {
 
 		Core.multiply(abs_grad_x, Scalar.all(255),abs_grad_x);
 
-
 		imwrite(TARGET_PATH + "5"+image, abs_grad_x);
-
-
 
 		morphologyEx(abs_grad_x,abs_grad_x, MORPH_CLOSE, rectangleKernal);
 		imwrite(TARGET_PATH + "6"+image, abs_grad_x);
 		threshold(abs_grad_x, abs_grad_x,0,255, THRESH_BINARY|THRESH_OTSU);
 		imwrite(TARGET_PATH + "7"+image, abs_grad_x);
+
+		try {
+			return checIfMRZFound(gray, abs_grad_x, superOriginalImage);
+		} catch(Exception e){
+			System.out.println("not detected after 7");
+		}
 		morphologyEx(abs_grad_x, abs_grad_x,MORPH_CLOSE, squareKernal);
 		imwrite(TARGET_PATH + "8"+image, abs_grad_x);
+		try {
+			return checIfMRZFound(gray, abs_grad_x, superOriginalImage);
+		} catch(Exception e){
+			System.out.println("not detected after 8");
+		}
 		erode(abs_grad_x, abs_grad_x, rectangleKernal);
 		imwrite(TARGET_PATH + "9"+image, abs_grad_x);
 
 		Mat originalCopy = new Mat();
 		abs_grad_x.copyTo(originalCopy);
 
+		return checIfMRZFound(gray, originalCopy, superOriginalImage);
+
+	}
+
+	public String checIfMRZFound(Mat gray, Mat originalCopy, Mat superOriginalImage){
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 		Mat hierarchy = new Mat();
 		findContours(originalCopy, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
@@ -140,11 +153,12 @@ public class RecognizeText {
 
 				rect.x = rect.x - px.intValue();
 				rect.y = rect.y - py.intValue();
+				rect.x = rect.x < 0?0:rect.x;
 
-				rect.width = rect.width + (px.intValue()*2);
+ 				rect.width = rect.width + (px.intValue()*2);
 				rect.height = rect.height + (py.intValue()*2);
-
-//				Mat roi = superOriginalImage[rect.y:rect.y+rect.height, rect.x:rect.width];
+				rect.width = rect.width>gray.size(1)?gray.size(1):rect.width;
+				rect.height = rect.height>gray.size(0)?gray.size(0):rect.height;
 //				Mat mat = new Mat(superOriginalImage,rect);
 
 				imwrite(TARGET_PATH + "roi"+image, new Mat(superOriginalImage,rect));
@@ -153,8 +167,14 @@ public class RecognizeText {
 
 			}
 		}
-
-		return found;
+		String result="";
+		try {
+			result = tesseract.doOCR(new File(TARGET_PATH + "roi"+image));
+			System.out.println(result);
+		} catch (TesseractException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 
@@ -167,10 +187,10 @@ public class RecognizeText {
 		// Read image
 		Mat origin = imread(SRC_PATH + image);
 		
-		String result = new RecognizeText().extractTextFromImage(origin);
-//		String result = new RecognizeText().extractMRZ(origin);
+//		String result = new RecognizeText().extractTextFromImage(origin);
+		String result = new RecognizeText().extractMRZ(origin);
 		final MrzRecord record = MrzParser.parse(result);
-		System.out.println(record.toMrz());
+//		System.out.println(record.toMrz());
 		System.out.println(result);
 		
 		System.out.println("Time");
