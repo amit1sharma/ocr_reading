@@ -7,17 +7,16 @@ plugins {
 group = 'com.amt'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
-
+/*
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-}
+} */
 
 repositories {
     flatDir {
         dirs '/home/yamraaj/Documents/opencv/opencv_2/opencv/build/bin/'
-//        dirs '/usr/share/java/opencv4'
     }
     mavenCentral()
 }

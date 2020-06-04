@@ -72,4 +72,9 @@ public class MRZController {
         System.out.println("Done");
         return "time taken is : "+ (System.currentTimeMillis() - start);
     }
+
+    public static void main(String[] args){
+        MRZController o = new MRZController();
+        o.loadImage();
+    }
 }
