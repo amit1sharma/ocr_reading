@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://adcb.com/ocr/providers/ExtractMRZ"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://adcb.com/ocr/providers/ExtractMRZ">
+	<xsd:complexType name="ExtractMRZRequest">
+		<xsd:sequence>
+			<xsd:element name="cid" type="xsd:string" minOccurs="0"
+				maxOccurs="1" />
+			<xsd:element name="imgEncodedFP" type="xsd:string"
+				minOccurs="0" maxOccurs="1" />
+			<xsd:element name="imgEncodedBP" type="xsd:string"
+				minOccurs="0" maxOccurs="1" />
+			<xsd:element name="docType" type="xsd:string" 
+				minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+    <xsd:element name="ExtractMRZRequest"
+    	type="tns:ExtractMRZRequest">
+    </xsd:element>
+
+	<xsd:element name="ExtractMRZResponse" type="tns:ExtractMRZResponse">
+	</xsd:element>
+
+	<xsd:complexType name="ExtractMRZResponse">
+		<xsd:sequence>
+			<xsd:element name="passportName" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="passportNumber" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="expirydate" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="issueDate" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="countryCode" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="placeOfIssue" type="xsd:string" 
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="surname" type="xsd:string" 
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="city" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="dateOFBirth" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="eidaNumber" type="xsd:string"
+				 maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="eidaExpiry" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="eidaName" type="xsd:string" 
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="eidaCardNumber" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="nationality" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>				
+			<xsd:element name="passportType" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>				
+			<xsd:element name="errorCode" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="errorDescription" type="xsd:string"
+				maxOccurs="1" minOccurs="0"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>
