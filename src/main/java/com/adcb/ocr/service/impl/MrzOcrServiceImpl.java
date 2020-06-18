@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.adcb.ocr.controller.OCREngine;
 import com.adcb.ocr.decode.MrzParser;
 import com.adcb.ocr.decode.records.MRP;
 import com.adcb.ocr.decode.records.MrtdTd1;
+import com.adcb.ocr.engine.OCREngine;
 import com.adcb.ocr.model.ExtractMRZResponse;
 import com.adcb.ocr.service.MrzOcrService;
 
@@ -146,7 +146,7 @@ public class MrzOcrServiceImpl implements MrzOcrService{
 			extractMRZResponse.setErrorDescription("Success");
 			return extractMRZResponse;
 		}
-		if(!result.equals("") && docType.equals(eidType)){
+		else if(!result.equals("") && docType.equals(eidType)){
 			MrtdTd1 record = (MrtdTd1)MrzParser.parse(result);
 			extractMRZResponse.setPassportName("");
 			extractMRZResponse.setPassportNumber("");
@@ -169,6 +169,10 @@ public class MrzOcrServiceImpl implements MrzOcrService{
 			extractMRZResponse.setErrorCode("0");
 			extractMRZResponse.setErrorDescription("Success");
 			return extractMRZResponse;
+		}
+		if(result==null || "".equals(result.trim())){
+			extractMRZResponse.setErrorCode("1");
+			extractMRZResponse.setErrorDescription("Failure : MRZ could not be read !!");
 		}
 		return extractMRZResponse;
 	}
