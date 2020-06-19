@@ -62,6 +62,7 @@ public class OCREngine {
                 text = Utilities.removeSpace(text);
                 if(!Utilities.validateMRZString(text, docType)){
                 	text="";
+                    System.out.println("unable to find in "+r.getClass().getName());
                 	continue;
                 }
                 System.out.println("Found in rule : "+r.getClass().getName());

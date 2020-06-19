@@ -26,9 +26,10 @@ repositories {
 
 dependencies {
  	implementation group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.5.1'
-    implementation (name: 'opencv-440', ext:'jar')
+
+    implementation (name: 'opencv-430', ext:'jar')
     implementation (name: 'ojdbc6-1.0', ext:'jar')
-  implementation group: 'org.bytedeco', name: 'tesseract-platform', version: '4.1.1-1.5.3'
+    implementation group: 'org.bytedeco', name: 'tesseract-platform', version: '4.1.1-1.5.3'
     implementation ('org.springframework.boot:spring-boot-starter-web')
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -51,4 +52,3 @@ configurations {
 		exclude group: 'ch.qos.logback', module: 'logback-classic'
 	}
 }
-
