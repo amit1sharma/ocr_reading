@@ -33,15 +33,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Range;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import com.adcb.ocr.util.Utilities;
@@ -58,6 +50,9 @@ public class Image {
     String imageAbsoluteTargetPath;
     String imageName;
 
+    public Mat get_original_image(){
+        return this._original_image;
+    }
 
     public Image() {
     }
@@ -83,26 +78,6 @@ public class Image {
         f.mkdirs();
         this.imageAbsoluteTargetPath = tgtPath;
         this.imageName = imageName;
-        selectKernels();
-    }
-
-    Mat rectangleKernel, squareKernel;
-    public void selectKernels(){
-        int rectKWidth , rectKHeight, sqKWidth, sqKHeight;
-
-        if(_original_image.width()>=900){
-            rectKWidth=50;
-            rectKHeight = 30;
-            sqKWidth=50;
-            sqKHeight = 50;
-        } else {
-            rectKWidth=30;
-            rectKHeight = 20;
-            sqKWidth=30;
-            sqKHeight = 30;
-        }
-        rectangleKernel = getStructuringElement(MORPH_RECT, new Size(rectKWidth, rectKHeight));
-        squareKernel = getStructuringElement(MORPH_RECT, new Size(sqKWidth, sqKHeight));
     }
     public Image gaussianBlur(Size... size){
         Size s = size.length>0?size[0]:new Size(11,11);
@@ -114,10 +89,19 @@ public class Image {
     public float calculatePPI(){
         return Utilities.calculateDPI(this._mat.height(), this._mat.width());
     }
-    public Image resize(int width) throws Exception {
+    public Image resizeWidth(int width) throws Exception {
         if(_mat!=null){
             if(_mat.width() >= width){
                 Imgproc.resize(_mat, _mat, new Size(width, _mat.height()));
+            }
+        }
+        //operationPerformed.add(Image.class.getEnclosingMethod().getName());
+        return this;
+    }
+    public Image resizeHeight(int height) throws Exception {
+        if(_mat!=null){
+            if(_mat.height() >= height){
+                Imgproc.resize(_mat, _mat, new Size(_mat.width(), height));
             }
         }
         //operationPerformed.add(Image.class.getEnclosingMethod().getName());
@@ -339,8 +323,6 @@ public class Image {
 //        save(_original_image, path);
         for(MatOfPoint m : contours){
             Rect rect = boundingRect(m);
-            Mat currentRoi = new Mat(_gray,rect);
-            save(currentRoi, path);
             float aspectRatio = (float)rect.width / rect.height;
             float coverageRatioH = (float)rect.width / _gray.width();
 
@@ -386,7 +368,7 @@ public class Image {
 //                rect.height = rect.height>_gray.size(0)?_gray.size(0):rect.height;
                 Mat finalRoi = new Mat(_gray,rect);
                 save(finalRoi, path);
-                preprocessROI(rectangleKernel, finalRoi);
+                preprocessROI(finalRoi);
                 save(finalRoi, path);
                 found = true;
                 break;
@@ -394,9 +376,8 @@ public class Image {
         }
         return found;
     }
-    public void preprocessROI(Mat rectangleKernel, Mat finalRoi){
+    public void preprocessROI( Mat finalRoi){
         try {
-            if(rectangleKernel!=null) {
                 deskewThis(finalRoi);
 //                Mat adap = new Mat();
 //                threshold(finalRoi, adap, 50, 255, THRESH_OTSU);//(finalRoi, adap, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 15, 10);
@@ -407,9 +388,7 @@ public class Image {
                 erode(finalRoi, finalRoi, squareKernel);
 //                Core.bitwise_not(finalRoi, finalRoi);
 //                save(finalRoi);
-            } else{
-                System.err.println("rectangleKernel not initialized");
-            }
+
         } catch (NullPointerException e){
             e.printStackTrace();
         }
@@ -516,6 +495,13 @@ public class Image {
         }
         return this;
     }
+
+    public Image markAreaOfInterest(Mat mat,  List<MatOfPoint> contours) {
+        for (int i=0; i< contours.size(); i++){
+            drawContours(mat, contours, i, new Scalar(255, 0, 0),3);
+        }
+        return this;
+    }
     public Image removeNoise(Size size){
         if(_mat!=null) {
             size = size!=null?size:new Size(1,1);
@@ -554,6 +540,81 @@ public class Image {
         Mat rectangleKernel = getStructuringElement(MORPH_RECT, size);
         erode(_mat, _mat, rectangleKernel);
         return this;
+    }
+
+    public Image getPerspectiveImage(){
+        MatOfPoint2f finalPoints = edgeDetection();
+        fourPointTransform(finalPoints);
+        return this;
+    }
+
+    public MatOfPoint2f edgeDetection(){
+        this.greyScale()
+                .gaussianBlur(new Size(5, 5));
+        save();
+        Canny(_mat, _mat, 110, 1);
+        save();
+//        Mat squareKernel = getStructuringElement(MORPH_RECT, new Size(1, 1));
+//        dilate(_mat, _mat, squareKernel);
+//        this.erodeImage(new Size(1, 1));
+        horizontalConnect(3,3);
+        save();
+        List<MatOfPoint> mop = getRectangles();
+//        markAreaOfInterest(_original_image, mop);
+//        save(_original_image);
+        MatOfPoint2f finalPoints = new MatOfPoint2f();
+        for(MatOfPoint m : mop ) {
+
+            MatOfPoint2f thisContour2f = new MatOfPoint2f();
+            m.convertTo(thisContour2f, CvType.CV_32FC2);
+            MatOfPoint2f mopApprox = new MatOfPoint2f();
+
+            double arc = arcLength(thisContour2f, true);
+            approxPolyDP(thisContour2f, mopApprox, 0.02 * arc, true);
+            if (mopApprox.size().height == 4) {
+                mopApprox.copyTo(finalPoints);
+                break;
+            }
+        }
+        Mat mm = new Mat(_original_image, boundingRect(finalPoints));
+        save(mm);
+        return finalPoints;
+    }
+    private void fourPointTransform(MatOfPoint2f mopApprox){
+
+        MatOfPoint2f ordered = Utilities.orderPointsClockwise(mopApprox);
+        Point[] pts = ordered.toArray();
+
+        Point tl = pts[0];
+        Point tr = pts[1];
+        Point bl = pts[2];
+        Point br = pts[3];
+
+        double widthTop = tr.x - tl.x;
+        double widthBottom = br.x - bl.x;
+        Double maxWidth = Math.max(widthTop, widthBottom);
+
+        double heightLeft = bl.y - tl.y;
+        double heightRight = br.y - tr.y;
+        Double maxHeight = Math.max(heightLeft, heightRight);
+
+
+        Mat destImage = new Mat(maxHeight.intValue(), maxWidth.intValue(), _original_image.type());
+        Mat src = new MatOfPoint2f(
+                pts[0],
+                pts[1],
+                pts[2],
+                pts[3]);
+        Mat dst = new MatOfPoint2f(
+                new Point(0, 0),
+                new Point(destImage.width() - 1, 0),
+                new Point(destImage.width() - 1, destImage.height() - 1),
+                new Point(0, destImage.height() - 1));
+
+        Mat transform = Imgproc.getPerspectiveTransform(src, dst);
+        Imgproc.warpPerspective(_original_image, destImage, transform, destImage.size());
+        destImage.copyTo(_mat);
+        destImage.copyTo(_original_image);
     }
 
 }
