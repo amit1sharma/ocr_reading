@@ -1,0 +1,9 @@
+pluginManagement {
+
+    repositories {
+        maven {
+                url "http://localhost:8080/repository/internal/"
+        }
+    }
+}
+rootProject.name = 'ocr'

@@ -18,17 +18,22 @@ configurations {
 } */
 
 repositories {
-    mavenCentral()
-    flatDir {
-        dirs 'libs'
+    maven {
+            url "http://localhost:8080/repository/internal/"
     }
+//     mavenCentral()
+    /* flatDir {
+        dirs 'libs'
+    } */
 }
 
 dependencies {
  	implementation group: 'net.sourceforge.tess4j', name: 'tess4j', version: '4.5.1'
 
-    implementation (name: 'opencv-430', ext:'jar')
-    implementation (name: 'ojdbc6-1.0', ext:'jar')
+    implementation group:'adcb', name :'opencv', version:'4.3.0'
+    implementation group:'adcb', name :'ojdbc', version:'6-1.0'
+//     implementation (name: 'opencv-430', ext:'jar')
+//     implementation (name: 'ojdbc6-1.0', ext:'jar')
     implementation group: 'org.bytedeco', name: 'tesseract-platform', version: '4.1.1-1.5.3'
     implementation ('org.springframework.boot:spring-boot-starter-web')
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
