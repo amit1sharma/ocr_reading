@@ -13,8 +13,8 @@ import com.adcb.ocr.engine.rules.Rule;
  * from this rule onwards all .net rules are implemented
  * 
  */
-@Component
-@Order(6)
+//@Component
+//@Order(6)
 public class Rule6 implements Rule {
     public Rule6() {
     }

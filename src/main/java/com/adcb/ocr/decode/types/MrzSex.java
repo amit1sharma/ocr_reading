@@ -45,8 +45,13 @@ public enum MrzSex {
             case '<':
             case 'X':
                 return X;
+            case 'H':
+                return M;
+            case 'I':
+                return F;
             default:
-                throw new RuntimeException("Invalid MRZ sex character: " + sex);
+            	return M;
+              //  throw new RuntimeException("Invalid MRZ sex character: " + sex);
         }
     }
 }

@@ -22,12 +22,22 @@ import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import com.adcb.ocr.constants.OcrConstants;
+import com.adcb.ocr.decode.MrzParseException;
+import com.adcb.ocr.decode.MrzParser;
+import com.adcb.ocr.decode.types.MrzDocumentCode;
+
 
 
 public final class Utilities {
 
 	private static String ppMatcherRegex = "([A-Z])([A-Z0-9<])([A-Z]{3})([A-Z<]{39})\n([A-Z0-9<]{9})([0-9])([A-Z]{3})([0-9]{6})([0-9])([MF<])([0-9]{6})([0-9])([A-Z0-9<]{14})([0-9])([0-9])";
 	static DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+	
+	private static final Pattern pp = Pattern.compile("[A-Z0-9<]{44}[\n][A-Z0-9<]{44}");
+	private static final Pattern eid = Pattern.compile("[A-Z0-9<]{30}[\n][A-Z0-9<]{30}[\n][A-Z0-9<]{30}");
+
+	
 	
     private static long oneSqInchPxl = 9216;
 
@@ -142,8 +152,7 @@ public final class Utilities {
     	}
     	return result;
     }
-
-	public static MatOfPoint2f orderPointsClockwise(MatOfPoint2f screenCnt2f) {
+    public static MatOfPoint2f orderPointsClockwise(MatOfPoint2f screenCnt2f) {
 		System.out.println(screenCnt2f.dump());
 
 		List<Point> points = screenCnt2f.toList();
@@ -184,5 +193,50 @@ public final class Utilities {
 		return screenCnt2f;
 	}
 	
+	public static String getEidFP(String data){
+		
+	//	String[] lines = data.split("\\n");
+		Pattern p = Pattern.compile("[0-9]{15}");
+		Matcher m = p.matcher(data);
+		String result = "";
+		while (m.find()) {
+		    result = m.group();
+			if (!MrzParser.checkDigitEida(result)){
+				result = result + "FAIL";
+			}
+		}
+		
+
+		return result;
+	}
 	
+	public static String extractMrzString(String fullPageData, String docType){
+		String result = "";
+		if(docType.equalsIgnoreCase("PP")){
+			//Pattern p = Pattern.compile("[A-Z0-9<]{44}[\n][A-Z0-9<]{44}");
+			Matcher m = pp.matcher(fullPageData);
+
+			while (m.find()) {
+			    result = m.group();
+			}
+		}
+		else if(docType.equalsIgnoreCase("EID")){
+			//Pattern p = Pattern.compile("[A-Z0-9<]{30}[\n][A-Z0-9<]{30}[\n][A-Z0-9<]{30}");
+			Matcher m = eid.matcher(fullPageData);
+
+			while (m.find()) {
+			    result = m.group();
+			}
+			
+		}
+		if(!result.equals("")){
+			try{
+				MrzDocumentCode.parse(result);
+			} catch (MrzParseException e){
+				result ="";
+			}
+		}
+		return result;
+		
+	}
 }

@@ -13,26 +13,23 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
 
-@Service
-@Profile("!dev")
+//@Service
+//@Profile("!dev")
 public class TesseractTextReader implements TextReader{
 	
 
-	/*@Value("${tesseract.tessdata.path}")
+	@Value("${tesseract.tessdata.path}")
 	private String tessDataPath;
 	
 	@Value("${tesseract.tessdata.lang}")
-	private String tessDataLang;*/
+	private String tessDataLang;
 
-	Tesseract tesseract1 = new Tesseract();
-	@Autowired
-	public TesseractTextReader(@Value("${tesseract.tessdata.path}")String tessDataPath, @Value("${tesseract.tessdata.lang}")String tessDataLang){
-		tesseract1.setDatapath(tessDataPath);
-        tesseract1.setLanguage(tessDataLang);
-	};
 
 	@Override
-	public String readText(String filePath) throws TesseractException {        
+	public String readText(String filePath) throws TesseractException {   
+		Tesseract tesseract1 = new Tesseract();
+		tesseract1.setDatapath(tessDataPath);
+        tesseract1.setLanguage(tessDataLang);
 		return tesseract1.doOCR(new File(filePath));
 	}
 

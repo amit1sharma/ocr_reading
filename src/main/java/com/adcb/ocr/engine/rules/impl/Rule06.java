@@ -15,26 +15,25 @@ import com.adcb.ocr.engine.rules.Rule;
  * including 2 page height and single page height
  */
 @Component
-@Order(3)
-public class Rule3 implements Rule {
-    public Rule3() {
+@Order(6)
+public class Rule06 implements Rule {
+    public Rule06() {
     }
-
 
     @Override
     public String applyRule(String imagePath, String imageName, String docType) throws Exception {
     	String result = "";
         Image i = new Image(docType, imagePath, imageName);
         result = i
-//        		.denoise().save()
                 .greyScale().save()
                 .gaussianBlur(new Size(11, 11)).save()
                 .gradient().save()
                 .setThreshold(0,255, THRESH_BINARY|THRESH_OTSU).save()
-                .horizontalConnect(3, 6).save()
-                .erodeImage(new Size(5, 10)).save()
+                .horizontalConnect(4, 8).save()
+                .erodeImage(new Size(5, 5)).save()
                 .findContourRectangles()
-                .getRoiImagePath();
+                .getRoiImagePath(false);
+
         return result;
     }
 

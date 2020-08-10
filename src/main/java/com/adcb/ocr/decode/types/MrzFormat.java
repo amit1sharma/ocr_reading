@@ -3,13 +3,8 @@ package com.adcb.ocr.decode.types;
 import com.adcb.ocr.decode.MrzParseException;
 import com.adcb.ocr.decode.MrzRange;
 import com.adcb.ocr.decode.MrzRecord;
-import com.adcb.ocr.decode.records.FrenchIdCard;
 import com.adcb.ocr.decode.records.MRP;
 import com.adcb.ocr.decode.records.MrtdTd1;
-import com.adcb.ocr.decode.records.MrtdTd2;
-import com.adcb.ocr.decode.records.MrvA;
-import com.adcb.ocr.decode.records.MrvB;
-import com.adcb.ocr.decode.records.SlovakId2_34;
 
 /**
  * Lists all supported MRZ formats. Note that the order of the enum constants are important, see for example {@link  #FRENCH_ID}.
@@ -19,61 +14,11 @@ public enum MrzFormat {
     /**
      * MRTD td1 format: A three line long, 30 characters per line format.
      */
-    MRTD_TD1(3, 30, MrtdTd1.class),
-    /**
-     * French 2 line/36 characters per line format, used with French ID cards.
-     * Need to occur before the {@link #MRTD_TD2} enum constant because of the same values for row/column.
-     * See below for the "if" test.
-     */
-    FRENCH_ID(2, 36, FrenchIdCard.class) {
-
-        public boolean isFormatOf(String[] mrzRows) {
-            if (!super.isFormatOf(mrzRows)) {
-                return false;
-            }
-            return mrzRows[0].substring(0, 5).equals("IDFRA");
-        }
-    },
-    /**
-     * MRV type-B format: A two lines long, 36 characters per line format.
-     * Need to occur before the {@link #MRTD_TD2} enum constant because of the same values for row/column.
-     * See below for the "if" test.
-     */
-    MRV_VISA_B(2, 36, MrvB.class) {
-
-        public boolean isFormatOf(String[] mrzRows) {
-            if (!super.isFormatOf(mrzRows)) {
-                return false;
-            }
-            return mrzRows[0].substring(0, 1).equals("V");
-        } 
-    },    
-    /**
-     * MRTD td2 format: A two line long, 36 characters per line format.
-     */
-    MRTD_TD2(2, 36, MrtdTd2.class),
-    /**
-     * MRV type-A format: A two lines long, 44 characters per line format
-     * Need to occur before {@link #PASSPORT} constant because of the same values for row/column.
-     * See below for the "if" test.
-     */
-    MRV_VISA_A(2, 44, MrvA.class) {
-
-        public boolean isFormatOf(String[] mrzRows) {
-            if (!super.isFormatOf(mrzRows)) {
-                return false;
-            }
-            return mrzRows[0].substring(0, 1).equals("V");
-        }
-    }, 
+    MRTD_TD1(3, 30, MrtdTd1.class), 
     /**
      * MRP Passport format: A two line long, 44 characters per line format.
      */
-    PASSPORT(2, 44, MRP.class),
-    /**
-     * Unknown 2 line/34 characters per line format, used with old Slovak ID cards.
-     */
-    SLOVAK_ID_234(2, 34, SlovakId2_34.class);
+    PASSPORT(2, 44, MRP.class);
     public final int rows;
     public final int columns;
     private final Class<? extends MrzRecord> recordClass;

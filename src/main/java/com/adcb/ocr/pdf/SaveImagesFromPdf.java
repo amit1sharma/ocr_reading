@@ -1,5 +1,4 @@
 package com.adcb.ocr.pdf;
-
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;

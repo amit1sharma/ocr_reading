@@ -13,8 +13,8 @@ import com.adcb.ocr.engine.rules.Rule;
 /**
  ** rule for rotation
  */
-@Component
-@Order(18)
+//@Component
+//@Order(18)
 public class Rule18 implements Rule {
     public Rule18() {
     }
