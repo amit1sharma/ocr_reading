@@ -1,31 +1,39 @@
 package com.adcb.ocr.engine.rules.impl;
 
-import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
-import static org.opencv.imgproc.Imgproc.THRESH_OTSU;
-
+import com.adcb.ocr.engine.image.Image;
+import com.adcb.ocr.engine.rules.Rule;
+import org.opencv.core.Mat;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.adcb.ocr.engine.image.Image;
-import com.adcb.ocr.engine.rules.Rule;
+import java.io.File;
+
+import static org.opencv.imgproc.Imgproc.*;
 
 /**
- * this rule is for pictures that are scanned or click and cropped properly but with not proper quality.
+ * this rule is for standard pictures that are scanned or click and cropped properly.
  * including 2 page height and single page height
+ * this should cover double image aligned vertically
  */
 @Component
-@Order(6)
-public class Rule06 implements Rule {
-    public Rule06() {
+@Order(7)
+public class Rule7 implements Rule {
+    public Rule7() {
     }
 
     @Override
     public String applyRule(String imagePath, String imageName, String docType) throws Exception {
     	String result = "";
+//        Mat mat = Imgcodecs.imread(imagePath + File.separator + imageName);
         Image i = new Image(docType, imagePath, imageName);
         result = i
                 .greyScale().save()
+
+//                .setAdaptiveThreshold(255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 10).save()
+                .removeWaterMark().save()
                 .gaussianBlur(new Size(11, 11)).save()
                 .gradient().save()
                 .setThreshold(0,255, THRESH_BINARY|THRESH_OTSU).save()
@@ -36,5 +44,4 @@ public class Rule06 implements Rule {
 
         return result;
     }
-
 }

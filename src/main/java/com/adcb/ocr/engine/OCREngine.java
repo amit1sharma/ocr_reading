@@ -2,8 +2,10 @@ package com.adcb.ocr.engine;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.adcb.ocr.engine.rules.impl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,6 @@ import org.springframework.stereotype.Component;
 import com.adcb.ocr.constants.OcrConstants;
 import com.adcb.ocr.engine.rules.Rule;
 import com.adcb.ocr.engine.rules.RuleEidaFP;
-import com.adcb.ocr.engine.rules.impl.Rule1;
-import com.adcb.ocr.engine.rules.impl.Rule2;
-import com.adcb.ocr.engine.rules.impl.Rule3;
-import com.adcb.ocr.engine.rules.impl.Rule4;
-import com.adcb.ocr.engine.rules.impl.Rule5;
 import com.adcb.ocr.engine.tess.TextReader;
 import com.adcb.ocr.util.Utilities;
 
@@ -36,6 +33,9 @@ public class OCREngine {
 	@Autowired
 	private List<RuleEidaFP> rulesEidaFP;
 	private static final Logger APPLOGGER = LoggerFactory.getLogger(OCREngine.class);
+
+	@Autowired
+	private Rule7 rule7;
 
 	/**
 	 * this is for local testing only
@@ -94,13 +94,16 @@ public class OCREngine {
 			APPLOGGER.debug(text);
 		}
 		else 
-		{ 
+		{
+//			rules = new ArrayList<>();
+//			rules.add(rule7);
 			for(Rule r : rules){
 				text="";
 				try {
 					APPLOGGER.info("processing rule : {} ", r.getClass().getName());
 					String roiImagePath = r.applyRule(srcPath, imageName, docType);
 					text = textReader.readText(roiImagePath + File.separator + imageName);
+					APPLOGGER.info(text);
 					text = Utilities.removeSpace(text);
 					if(!Utilities.validateMRZString(text, docType)){
 						if(r.getClass().getName().contains("Rule22")

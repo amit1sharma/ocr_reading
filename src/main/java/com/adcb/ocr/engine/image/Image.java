@@ -2,28 +2,7 @@ package com.adcb.ocr.engine.image;
 
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 import static org.opencv.imgcodecs.Imgcodecs.imwrite;
-import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.Canny;
-import static org.opencv.imgproc.Imgproc.GaussianBlur;
-import static org.opencv.imgproc.Imgproc.HoughLinesP;
-import static org.opencv.imgproc.Imgproc.MORPH_CLOSE;
-import static org.opencv.imgproc.Imgproc.MORPH_GRADIENT;
-import static org.opencv.imgproc.Imgproc.MORPH_RECT;
-import static org.opencv.imgproc.Imgproc.RETR_EXTERNAL;
-import static org.opencv.imgproc.Imgproc.Sobel;
-import static org.opencv.imgproc.Imgproc.adaptiveThreshold;
-import static org.opencv.imgproc.Imgproc.approxPolyDP;
-import static org.opencv.imgproc.Imgproc.arcLength;
-import static org.opencv.imgproc.Imgproc.boundingRect;
-import static org.opencv.imgproc.Imgproc.contourArea;
-import static org.opencv.imgproc.Imgproc.cvtColor;
-import static org.opencv.imgproc.Imgproc.drawContours;
-import static org.opencv.imgproc.Imgproc.erode;
-import static org.opencv.imgproc.Imgproc.findContours;
-import static org.opencv.imgproc.Imgproc.getStructuringElement;
-import static org.opencv.imgproc.Imgproc.morphologyEx;
-import static org.opencv.imgproc.Imgproc.threshold;
+import static org.opencv.imgproc.Imgproc.*;
 import static org.opencv.photo.Photo.fastNlMeansDenoisingColored;
 
 import java.io.File;
@@ -141,7 +120,7 @@ public class Image {
     	}
     	return this;
     }
-    
+
     public Image rotateMat(Double angle){
 	    if (angle == 270 || angle == -90){
 	        // Rotate clockwise 270 degrees
@@ -158,14 +137,14 @@ public class Image {
 	    	Core.flip(_mat, _mat, 1);
 	    }
 	    else if (angle == 360 || angle == 0 || angle == -360){
-	        
+
 	    }
 	    else {
 	        Utilities.rotate(_mat, angle);
 	    }
 	    return this;
 	}
-    
+
     public Rect findBorder(int size){
 
         Mat src = new Mat();
@@ -276,8 +255,13 @@ public class Image {
         return this;
     }
 
+    public Image save(Mat mat){
+        save(mat, null);
+        return this;
+    }
+
     public Image save(Mat mat, String imageAbsoluteTargetPathWithImageName){
-        if(_mat!=null){
+        if(mat!=null){
             String imageNameWithPath = imageAbsoluteTargetPathWithImageName!=null?imageAbsoluteTargetPathWithImageName:this.imageAbsoluteTargetPath+File.separator+imageName;
             if("true".equalsIgnoreCase(ApplicationStatupConfigurator.saveStageImages)){
             	imwrite(imageNameWithPath, mat);
@@ -410,7 +394,7 @@ public class Image {
     public void preprocessROI( Mat finalRoi, boolean[] applyDenoise){
         try {
                 deskewThis(finalRoi);
-                
+
                 long stime = System.currentTimeMillis();
                 if(applyDenoise.length>0){
                 	if(applyDenoise[0]){
@@ -537,7 +521,7 @@ public class Image {
         }
         return this;
     }
-    
+
 
     public Image markAreaOfInterest(Mat mat,  List<MatOfPoint> contours) {
         for (int i=0; i< contours.size(); i++){
@@ -592,7 +576,7 @@ public class Image {
     	fastNlMeansDenoisingColored(mat, mat,10,10,7,21);
     	return this;
     }
-    
+
     public String getImagePath() throws Exception {
     	save(_mat,imageAbsoluteTargetPath+File.separator+imageName);
         return imageAbsoluteTargetPath;
@@ -671,5 +655,59 @@ public class Image {
         destImage.copyTo(_mat);
         destImage.copyTo(_original_image);
     }
+
+    public Image removeWaterMark() {
+        // approximate the background
+        Mat bg = _gray.clone();
+        for (int r = 1; r < 5; r++) {
+            Mat kernel2 = getStructuringElement(MORPH_ELLIPSE, new Size(5 * r + 1, 5 * r + 1));
+            morphologyEx(bg, bg, MORPH_CLOSE, kernel2);
+            morphologyEx(bg, bg, MORPH_OPEN, kernel2);
+        }
+// difference = background - initial
+        Mat dif = new Mat();
+        Core.subtract(bg, _gray, dif);
+// threshold the difference image so we get dark letters
+        Mat bw = new Mat();
+
+        threshold(dif, dif, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
+        dif.copyTo(_mat);
+        dif.copyTo(_original_image);
+// threshold the background image so we get dark region
+        /*Mat dark = new Mat();
+        threshold(bg, dark, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
+        save(dark);
+
+// extract pixels in the dark region
+
+        double[][] darkpix = new double[Core.countNonZero(dark)][];
+        int index = 0;
+        for (int r = 0; r < dark.height(); r++) {
+            for (int c = 0; c < dark.width(); c++) {
+                if (_gray.get(r, c) != null) {
+                    darkpix[index++] = _gray.get(r, c);
+                }
+            }
+        }
+
+// threshold the dark region so we get the darker pixels inside it
+        Mat darkpixMat = new Mat();
+//        darkpixMat.put(0, 0, );
+//        darkpixMat.pu
+        threshold(darkpixMat, darkpixMat, 0, 255, THRESH_BINARY | THRESH_OTSU);
+
+// paste the extracted darker pixels
+        index = 0;
+        for (int r = 0; r < dark.height(); r++) {
+            for (int c = 0; c < dark.width(); c++) {
+                if (darkpix[index++] != null) {
+                    bw.put(r, c, darkpix[index++]);
+                }
+            }
+        }*/
+
+        return this;
+    }
+
 
 }

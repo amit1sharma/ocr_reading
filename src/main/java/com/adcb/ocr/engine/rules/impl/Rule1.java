@@ -59,6 +59,7 @@ public class Rule1 implements Rule {
         result = i
 //        		.denoise().save()
                 .greyScale().save()
+//                .removeWaterMark().save()
                 .gaussianBlur(new Size(11, 11)).save()
                 .morphology(MORPH_BLACKHAT, rectSize).save()
                 .highlightEveryThing().save() // sobel

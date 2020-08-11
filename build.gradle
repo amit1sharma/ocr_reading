@@ -1,7 +1,7 @@
 buildscript {
   repositories {
     maven {
-      url "http://adcm7108.adcbmis.local:8080/repository/internal/"
+      url "http://localhost:8080/repository/internal/"
     }
   }
   dependencies {
@@ -17,7 +17,7 @@ apply plugin: "io.spring.dependency-management"
 
 repositories {
     maven{
-   url "http://adcm7108.adcbmis.local:8080/repository/internal/"
+   url "http://localhost:8080/repository/internal/"
     }
 }
 
@@ -37,7 +37,7 @@ dependencies {
 	implementation 'wsdl4j:wsdl4j:1.6.3' 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test' 
 	testImplementation 'org.apache.httpcomponents:httpclient:4.5.9' 
-	//providedRuntime 'com.h2database:h2:1.4.199' 
+	providedRuntime 'com.h2database:h2:1.4.199'
 	//implementation fileTree(dir: 'libs', include: ['*.jar'])
 	
 }
