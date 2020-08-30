@@ -5,12 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.adcb.ocr.constants.OcrConstants;
@@ -40,6 +44,9 @@ public class MrzOcrServiceImpl implements MrzOcrService{
 	private String acceptableCount;
 
 	@Autowired
+	private ThreadPoolTaskExecutor frontBackThreadPoolTaskExecutor;
+
+	@Autowired
 	private OCREngine ocrEngine;
 
 	@Autowired
@@ -54,7 +61,7 @@ public class MrzOcrServiceImpl implements MrzOcrService{
 
 	@Override
 	public ExtractMRZResponse getTextFromImage(String cid, String docType, String binaryImageFP, String binaryImageBP) {
-		String imageStoragePathPP = "", imageStoragePathEidFP = "", imageStoragePathEidBP = "", result = "", resultFP = "";
+		String imageStoragePathPP = "",  result = "", resultFP="";
 		boolean isRequestValid = true;
 		ExtractMRZResponse extractMRZResponse = new ExtractMRZResponse();
 
@@ -89,18 +96,52 @@ public class MrzOcrServiceImpl implements MrzOcrService{
 				}
 			}
 			else if(isRequestValid && docType.equalsIgnoreCase(eidType)){
-				String imageNameFP = "", imageNameBP = "";
-				imageStoragePathEidFP = eidImageStoragePath+cid;
-				File file = new File(imageStoragePathEidFP);
+
+				String imageStoragePathEid = eidImageStoragePath+cid;
+				File file = new File(imageStoragePathEid);
 				file.mkdirs();
-				imageNameFP  = saveImage(cid ,  OcrConstants.EIDFP, binaryImageFP, imageStoragePathEidFP);
-				if (!imageNameFP.equals("")){
-					imageStoragePathEidBP = eidImageStoragePath+cid;
-					imageNameBP =	saveImage(cid,  OcrConstants.EIDBP, binaryImageBP, imageStoragePathEidBP);
-				}
+				final String imageNameFP  = saveImage(cid ,  OcrConstants.EIDFP, binaryImageFP, imageStoragePathEid);
+//				final String imageStoragePathEidBP = eidImageStoragePath+cid;
+				final String imageNameBP =	saveImage(cid,  OcrConstants.EIDBP, binaryImageBP, imageStoragePathEid);
+
 				if(!imageNameFP.equals("") || !imageNameBP.equals("")){
-					resultFP = extractMRZ(imageStoragePathEidFP, imageNameFP, OcrConstants.EIDFP);
-					result = extractMRZ(imageStoragePathEidBP, imageNameBP, eidType);
+					final CountDownLatch latch = new CountDownLatch(2);
+					final Map<String, String> resultMap = new HashMap();
+					Runnable rFP = new Runnable() {
+						@Override
+						public void run() {
+							try{
+								String result1 = extractMRZ(imageStoragePathEid, imageNameFP, OcrConstants.EIDFP);
+								resultMap.put("resultFP", result1);
+								latch.countDown();
+							} catch(Exception e){
+								APPLOGGER.error("Unable to process", e);
+								e.printStackTrace();
+							}
+						}
+					};
+					Runnable rBP = new Runnable() {
+						@Override
+						public void run() {
+							try {
+								String result2 = extractMRZ(imageStoragePathEid, imageNameBP, eidType);
+								resultMap.put("resultBP", result2);
+								latch.countDown();
+							} catch (Exception e) {
+								APPLOGGER.error("Unable to process", e);
+								e.printStackTrace();
+							}
+						}
+					};
+					Thread t1 = new Thread(rFP);
+					Thread t2 = new Thread(rBP);
+					t1.start();
+					t2.start();
+					latch.await();
+					resultFP = resultMap.get("resultFP");
+					result = resultMap.get("resultBP");
+//					resultFP = extractMRZ(imageStoragePathEid, imageNameFP, OcrConstants.EIDFP);
+//					result = extractMRZ(imageStoragePathEid, imageNameBP, eidType);
 					if(null == result || result.trim().equals("") ){ //|| resultFP == null || resultFP.trim().equals("")
 						isRequestValid = false;
 					}
