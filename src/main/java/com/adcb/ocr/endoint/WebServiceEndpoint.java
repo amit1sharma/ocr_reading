@@ -2,6 +2,8 @@ package com.adcb.ocr.endoint;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -24,6 +26,9 @@ public class WebServiceEndpoint {
 	
 	@Autowired
 	private OcrRequestResponseService ocrRequestService;
+	
+	private static final Logger APPLOGGER = LoggerFactory.getLogger(WebServiceEndpoint.class);
+
 
 	@PayloadRoot(namespace = NAMESPACE_URI_EXTRACTMRZ, localPart = "ExtractMRZRequest")
 	@ResponsePayload
@@ -35,7 +40,7 @@ public class WebServiceEndpoint {
 		try{
 			ocrRequestService.saveLog(requestString, resposneString, requestTime, new Date());
 		}catch(Exception e){
-			e.printStackTrace();
+			APPLOGGER.error("Error while saving the log in DB" , e);
 		}
 		return response;
 	}

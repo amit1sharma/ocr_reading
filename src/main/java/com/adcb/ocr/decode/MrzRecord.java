@@ -70,6 +70,7 @@ public abstract class MrzRecord implements Serializable {
     public boolean validDateOfBirth = true;
     public boolean validExpirationDate = true;
     public boolean validComposite = true;
+    public boolean validEidaNumber = true;
 
 
     protected MrzRecord(MrzFormat format) {

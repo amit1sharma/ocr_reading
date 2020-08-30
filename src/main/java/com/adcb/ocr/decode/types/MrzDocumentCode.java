@@ -50,7 +50,7 @@ public enum MrzDocumentCode {
         // 2-letter checks
         switch(code){
             case "IV":
-                throw new MrzParseException("IV document code is not allowed", mrz, new MrzRange(0, 2, 0), null); // TODO why?
+                throw new MrzParseException("IV document code is not allowed", mrz, new MrzRange(0, 2, 0), null);
             case "AC": return CrewMember;
             case "ME": return Migrant;
             case "TD": return Migrant; // travel document

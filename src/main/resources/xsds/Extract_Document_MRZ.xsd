@@ -37,6 +37,12 @@
 				maxOccurs="1" minOccurs="0"></xsd:element>
 			<xsd:element name="surname" type="xsd:string" 
 				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="givenName" type="xsd:string" 
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="sex" type="xsd:string" 
+				maxOccurs="1" minOccurs="0"></xsd:element>
+			<xsd:element name="personalNo" type="xsd:string" 
+				maxOccurs="1" minOccurs="0"></xsd:element>												
 			<xsd:element name="city" type="xsd:string"
 				maxOccurs="1" minOccurs="0"></xsd:element>
 			<xsd:element name="dateOFBirth" type="xsd:string"
@@ -56,7 +62,7 @@
 			<xsd:element name="errorCode" type="xsd:string"
 				maxOccurs="1" minOccurs="0"></xsd:element>
 			<xsd:element name="errorDescription" type="xsd:string"
-				maxOccurs="1" minOccurs="0"></xsd:element>
+				maxOccurs="1" minOccurs="0"></xsd:element>			
 		</xsd:sequence>
 	</xsd:complexType>
 </xsd:schema>

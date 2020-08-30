@@ -6,14 +6,17 @@ import static org.bytedeco.leptonica.global.lept.pixRead;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.leptonica.PIX;
 import org.bytedeco.tesseract.TessBaseAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+import com.adcb.ocr.engine.OCREngine;
 import com.adcb.ocr.engine.tess.TextReader;
 
 @Service
-@Profile("dev")
+//@Profile("dev")
 public class ByteDecoTextReader implements TextReader{
 
 	@Value("${tesseract.tessdata.path}")
@@ -21,6 +24,7 @@ public class ByteDecoTextReader implements TextReader{
 	
 	@Value("${tesseract.tessdata.lang}")
 	private String tessDataLang;
+	private static final Logger APPLOGGER = LoggerFactory.getLogger(OCREngine.class);
 
 /*	TessBaseAPI tessBaseAPI = new TessBaseAPI();
 	@Autowired
@@ -35,8 +39,8 @@ public class ByteDecoTextReader implements TextReader{
 	public String readText(String filePath) throws Exception {
 		TessBaseAPI tessBaseAPI = new TessBaseAPI();
 		if(tessBaseAPI.Init(tessDataPath,tessDataLang)!=0){
-			System.err.println("could not initiate bytedeco text reader");
-			System.exit(1);
+			APPLOGGER.error("Could not initialize bytedeco text reader............");
+		//	System.exit(1);
 		}
 //		filePath = "C:\\data\\PP\\12345\\12345_PP.jpg";
 		PIX pix = pixRead(filePath);

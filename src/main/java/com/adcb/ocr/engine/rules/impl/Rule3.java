@@ -26,6 +26,7 @@ public class Rule3 implements Rule {
     	String result = "";
         Image i = new Image(docType, imagePath, imageName);
         result = i
+//        		.denoise().save()
                 .greyScale().save()
                 .gaussianBlur(new Size(11, 11)).save()
                 .gradient().save()

@@ -1,5 +1,4 @@
 package com.adcb.ocr.pdf;
-
 import com.adcb.ocr.engine.OCREngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +14,7 @@ public class ProcessPdf {
         saveImagesFromPdf.extractImage(path, fileName);
         String imageNameWithoutExt = fileName.split("\\.")[0];
         String imageName = imageNameWithoutExt+".png";
-        return ocrEngine.startEngine(path, imageName, docType);
+        return imageName;
+       // return ocrEngine.startEngine(path, imageName, docType);
     }
 }

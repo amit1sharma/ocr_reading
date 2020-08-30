@@ -25,6 +25,7 @@ public class Rule5 implements Rule {
     	String result = "";
         Image i = new Image(docType, imagePath, imageName);
         result = i
+//        		.denoise().save()
                 .greyScale().save()
 //                            .removeBorder().save()
                 .gaussianBlur(new Size(11, 11)).save()

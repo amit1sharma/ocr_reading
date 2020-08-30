@@ -1,5 +1,7 @@
 package com.adcb.ocr.decode.records;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.adcb.ocr.decode.MrzParser;
 import com.adcb.ocr.decode.MrzRange;
 import com.adcb.ocr.decode.MrzRecord;
@@ -11,6 +13,9 @@ import com.adcb.ocr.decode.types.MrzFormat;
 public class MrtdTd1 extends MrzRecord {
     private static final long serialVersionUID = 1L;
 
+	@Value("${tesseract.correction.required}")
+	private String correctionRequired;
+	
     public MrtdTd1() {
         super(MrzFormat.MRTD_TD1);
     }
@@ -31,8 +36,15 @@ public class MrtdTd1 extends MrzRecord {
         super.fromMrz(mrz);
         final MrzParser p = new MrzParser(mrz);
         documentNumber = p.parseString(new MrzRange(5, 14, 0));
+        if("Y".equals(correctionRequired)){
+        	documentNumber = MrzParser.fixTesseractReadingErrors(documentNumber);
+        }
         validDocumentNumber = p.checkDigit(14, 0, new MrzRange(5, 14, 0), "document number");
         optional = p.parseString(new MrzRange(15, 30, 0));
+     //   if("Y".equals(correctionRequired)){
+        	optional = MrzParser.fixTesseractReadingErrors(optional);
+    //    }
+        validEidaNumber = MrzParser.checkDigitEida(optional);
         dateOfBirth = p.parseDate(new MrzRange(0, 6, 1));
         validDateOfBirth = p.checkDigit(6, 1, new MrzRange(0, 6, 1), "date of birth") && dateOfBirth.isDateValid();
         sex = p.parseSex(7, 1);

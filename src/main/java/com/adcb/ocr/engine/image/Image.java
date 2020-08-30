@@ -2,28 +2,8 @@ package com.adcb.ocr.engine.image;
 
 import static org.opencv.imgcodecs.Imgcodecs.imread;
 import static org.opencv.imgcodecs.Imgcodecs.imwrite;
-import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.Canny;
-import static org.opencv.imgproc.Imgproc.GaussianBlur;
-import static org.opencv.imgproc.Imgproc.HoughLinesP;
-import static org.opencv.imgproc.Imgproc.MORPH_CLOSE;
-import static org.opencv.imgproc.Imgproc.MORPH_GRADIENT;
-import static org.opencv.imgproc.Imgproc.MORPH_RECT;
-import static org.opencv.imgproc.Imgproc.RETR_EXTERNAL;
-import static org.opencv.imgproc.Imgproc.Sobel;
-import static org.opencv.imgproc.Imgproc.adaptiveThreshold;
-import static org.opencv.imgproc.Imgproc.boundingRect;
-import static org.opencv.imgproc.Imgproc.contourArea;
-import static org.opencv.imgproc.Imgproc.cvtColor;
-import static org.opencv.imgproc.Imgproc.drawContours;
-import static org.opencv.imgproc.Imgproc.erode;
-import static org.opencv.imgproc.Imgproc.findContours;
-import static org.opencv.imgproc.Imgproc.getStructuringElement;
-import static org.opencv.imgproc.Imgproc.morphologyEx;
-import static org.opencv.imgproc.Imgproc.threshold;
-
 import static org.opencv.imgproc.Imgproc.*;
+import static org.opencv.photo.Photo.fastNlMeansDenoisingColored;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +13,19 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Range;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import com.adcb.ocr.config.ApplicationStatupConfigurator;
 import com.adcb.ocr.util.Utilities;
 
 public class Image {
@@ -110,8 +100,16 @@ public class Image {
 
     public Image greyScale(){
         if(_mat!=null){
-            cvtColor(_mat, _mat, COLOR_BGR2GRAY);
+            greyScale(_mat);
             _mat.copyTo(_gray);
+        }
+        //operationPerformed.add(Image.class.getEnclosingMethod().getName());
+        return this;
+    }
+    public Image greyScale(Mat mat){
+        if(_mat!=null){
+            cvtColor(mat, mat, COLOR_BGR2GRAY);
+//            _mat.copyTo(_gray);
         }
         //operationPerformed.add(Image.class.getEnclosingMethod().getName());
         return this;
@@ -122,7 +120,7 @@ public class Image {
     	}
     	return this;
     }
-    
+
     public Image rotateMat(Double angle){
 	    if (angle == 270 || angle == -90){
 	        // Rotate clockwise 270 degrees
@@ -139,14 +137,14 @@ public class Image {
 	    	Core.flip(_mat, _mat, 1);
 	    }
 	    else if (angle == 360 || angle == 0 || angle == -360){
-	        
+
 	    }
 	    else {
 	        Utilities.rotate(_mat, angle);
 	    }
 	    return this;
 	}
-    
+
     public Rect findBorder(int size){
 
         Mat src = new Mat();
@@ -241,37 +239,48 @@ public class Image {
     }
     public Image save(){
         if(_mat!=null){
-            imageAbsoluteTargetPath = imageAbsoluteTargetPath!=null?imageAbsoluteTargetPath:this.imageAbsoluteTargetPath;
-            imwrite(imageAbsoluteTargetPath+File.separator+System.currentTimeMillis()+imageName, _mat);
+//            imageAbsoluteTargetPath = imageAbsoluteTargetPath!=null?imageAbsoluteTargetPath:this.imageAbsoluteTargetPath;
+//            imwrite(imageAbsoluteTargetPath+File.separator+System.currentTimeMillis()+imageName, _mat);
+            save(imageAbsoluteTargetPath+File.separator+System.currentTimeMillis()+imageName);
         }
         return this;
     }
     public Image save(String imageAbsoluteTargetPath){
         if(_mat!=null){
-            imageAbsoluteTargetPath = imageAbsoluteTargetPath!=null?imageAbsoluteTargetPath:this.imageAbsoluteTargetPath;
-            imwrite(imageAbsoluteTargetPath+File.separator+imageName, _mat);
-        }
-        //operationPerformed.add(Image.class.getEnclosingMethod().getName());
-        return this;
-    }
-
-    public Image save(Mat mat, String imageAbsoluteTargetPath){
-        if(_mat!=null){
-            imageAbsoluteTargetPath = imageAbsoluteTargetPath!=null?imageAbsoluteTargetPath:this.imageAbsoluteTargetPath;
-            imwrite(imageAbsoluteTargetPath+File.separator+imageName, mat);
+//            imageAbsoluteTargetPath = imageAbsoluteTargetPath!=null?imageAbsoluteTargetPath:this.imageAbsoluteTargetPath;
+//            imwrite(imageAbsoluteTargetPath+File.separator+imageName, _mat);
+            save(_mat, imageAbsoluteTargetPath);
         }
         //operationPerformed.add(Image.class.getEnclosingMethod().getName());
         return this;
     }
 
     public Image save(Mat mat){
+        save(mat, null);
+        return this;
+    }
+
+    public Image save(Mat mat, String imageAbsoluteTargetPathWithImageName){
+        if(mat!=null){
+            String imageNameWithPath = imageAbsoluteTargetPathWithImageName!=null?imageAbsoluteTargetPathWithImageName:this.imageAbsoluteTargetPath+File.separator+imageName;
+            if("true".equalsIgnoreCase(ApplicationStatupConfigurator.saveStageImages)){
+            	imwrite(imageNameWithPath, mat);
+            } else{
+            	System.out.println("not saving image as not saveStageImage is not set in properties");
+            }
+        }
+        //operationPerformed.add(Image.class.getEnclosingMethod().getName());
+        return this;
+    }
+
+/*    public Image save1(Mat mat){
         if(_mat!=null){
             imageAbsoluteTargetPath = imageAbsoluteTargetPath!=null?imageAbsoluteTargetPath:this.imageAbsoluteTargetPath;
             imwrite(imageAbsoluteTargetPath+File.separator+System.currentTimeMillis()+imageName, mat);
         }
         //operationPerformed.add(Image.class.getEnclosingMethod().getName());
         return this;
-    }
+    }*/
 
     public Image horizontalConnect(int horizontalMoveSize, int verticalMoveSize){
         if(_mat!=null){
@@ -308,16 +317,22 @@ public class Image {
         return this;
     }
 
-    public String getRoiImagePath() throws Exception {
+    /**
+     * set applynoise false . default is true
+     * @param applyDenoise
+     * @return
+     * @throws Exception
+     */
+    public String getRoiImagePath(boolean... applyDenoise) throws Exception {
         String roiImagePath = imageAbsoluteTargetPath;
-        if(getSaveROI(allContours, roiImagePath)){
+        if(getSaveROI(allContours, roiImagePath, applyDenoise)){
             return roiImagePath;
         } else{
             throw new Exception ("Unable to find and ROI out of contours");
         }
     }
 
-    public boolean getSaveROI( List<MatOfPoint> contours, String path) throws Exception {
+    public boolean getSaveROI( List<MatOfPoint> contours, String path, boolean[] applyDenoise) throws Exception {
         boolean found = false;
 //        markAreaOfInterest(contours);
 //        save(_original_image, path);
@@ -336,7 +351,6 @@ public class Image {
                     *//**
                      * for handling case when two images in single image
                      *//*
-
                     if ((remaining_pixB * 2) > (_gray.height() / 2)) {
                         remaining_pixB = remaining_pixB * 2 - _gray.height() / 2;
                     }
@@ -366,31 +380,41 @@ public class Image {
                 rect.height = (rect.y + rect.height) > _gray.height() ? (rect.height - ((rect.y + rect.height) - _gray.height())) : rect.height;
 //                rect.width = rect.width>_gray.size(1)?_gray.size(1):rect.width;
 //                rect.height = rect.height>_gray.size(0)?_gray.size(0):rect.height;
-                Mat finalRoi = new Mat(_gray,rect);
-                save(finalRoi, path);
-                preprocessROI(finalRoi);
-                save(finalRoi, path);
+                Mat finalRoi = new Mat(_original_image,rect);
+//                save(finalRoi, path+File.separator+imageName);
+                preprocessROI(finalRoi, applyDenoise);
+                save(finalRoi, path+File.separator+imageName);
                 found = true;
                 break;
             }
         }
         return found;
     }
-    public void preprocessROI( Mat finalRoi){
+    public void preprocessROI( Mat finalRoi, boolean[] applyDenoise){
         try {
                 deskewThis(finalRoi);
-//                Mat adap = new Mat();
-//                threshold(finalRoi, adap, 50, 255, THRESH_OTSU);//(finalRoi, adap, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 15, 10);
-//                adaptiveThreshold(finalRoi, finalRoi, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 15, 10);
+
+                long stime = System.currentTimeMillis();
+                if(applyDenoise.length>0){
+                	if(applyDenoise[0]){
+                		denoise(finalRoi);
+                	}
+                } else{
+                	denoise(finalRoi);
+                }
+                System.out.println("time taken : " +(System.currentTimeMillis() - stime));
+//                save(finalRoi, null);
+                greyScale(finalRoi);
+             //   adaptiveThreshold(finalRoi, finalRoi, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 10);
 //                save(finalRoi);
 //                morphologyEx(finalRoi, finalRoi, MORPH_BLACKHAT, rectangleKernel);
-                Mat squareKernel = getStructuringElement(MORPH_RECT, new Size(1, 1));
-                erode(finalRoi, finalRoi, squareKernel);
+             //   Mat squareKernel = getStructuringElement(MORPH_RECT, new Size(1, 1));
+          //      erode(finalRoi, finalRoi, squareKernel);
 //                Core.bitwise_not(finalRoi, finalRoi);
 //                save(finalRoi);
 
-        } catch (NullPointerException e){
-            e.printStackTrace();
+        } catch (Exception e){
+//            e.printStackTrace();
         }
 
     }
@@ -434,7 +458,8 @@ public class Image {
     }
 
     public Image deskew(){
-        Size size = _mat.size();
+    	deskewThis(_mat);
+        /*Size size = _mat.size();
 //        Core.bitwise_not(source, source);
         Mat edges = new Mat();
         Canny(_mat, edges,10,150);
@@ -448,7 +473,7 @@ public class Image {
         }
         angle /= lines.size().area();
         angle = angle * 180 / Math.PI;
-        Utilities.rotate(_mat, angle);
+        Utilities.rotate(_mat, angle);*/
         return this;
     }
     public void deskewThis_dotnet(Mat mat){
@@ -496,6 +521,7 @@ public class Image {
         return this;
     }
 
+
     public Image markAreaOfInterest(Mat mat,  List<MatOfPoint> contours) {
         for (int i=0; i< contours.size(); i++){
             drawContours(mat, contours, i, new Scalar(255, 0, 0),3);
@@ -542,6 +568,18 @@ public class Image {
         return this;
     }
 
+    public Image denoise(){
+    	return denoise(_mat);
+    }
+    public Image denoise(Mat mat){
+    	fastNlMeansDenoisingColored(mat, mat,10,10,7,21);
+    	return this;
+    }
+
+    public String getImagePath() throws Exception {
+    	save(_mat,imageAbsoluteTargetPath+File.separator+imageName);
+        return imageAbsoluteTargetPath;
+    }
     public Image getPerspectiveImage(){
         MatOfPoint2f finalPoints = edgeDetection();
         fourPointTransform(finalPoints);
@@ -551,14 +589,14 @@ public class Image {
     public MatOfPoint2f edgeDetection(){
         this.greyScale()
                 .gaussianBlur(new Size(5, 5));
-        save();
+        //save();
         Canny(_mat, _mat, 110, 1);
-        save();
+        //save();
 //        Mat squareKernel = getStructuringElement(MORPH_RECT, new Size(1, 1));
 //        dilate(_mat, _mat, squareKernel);
 //        this.erodeImage(new Size(1, 1));
         horizontalConnect(3,3);
-        save();
+        //save();
         List<MatOfPoint> mop = getRectangles();
 //        markAreaOfInterest(_original_image, mop);
 //        save(_original_image);
@@ -577,7 +615,7 @@ public class Image {
             }
         }
         Mat mm = new Mat(_original_image, boundingRect(finalPoints));
-        save(mm);
+        //save(mm, null);
         return finalPoints;
     }
     private void fourPointTransform(MatOfPoint2f mopApprox){
@@ -616,5 +654,61 @@ public class Image {
         destImage.copyTo(_mat);
         destImage.copyTo(_original_image);
     }
+
+    public Image removeWaterMark(boolean dilate) {
+        // approximate the background
+        Mat bg = _gray.clone();
+        for (int r = 1; r < 5; r++) {
+            Mat kernel2 = getStructuringElement(MORPH_ELLIPSE, new Size(5 * r + 1, 5 * r + 1));
+            morphologyEx(bg, bg, MORPH_CLOSE, kernel2);
+            morphologyEx(bg, bg, MORPH_OPEN, kernel2);
+        }
+        
+// difference = background - initial
+        Mat dif = new Mat();
+        Core.subtract(bg, _gray, dif);
+        //save(dif);
+// threshold the difference image so we get dark letters
+
+        threshold(dif, dif, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
+        if(dilate){
+            Mat squareKernel = getStructuringElement(MORPH_RECT, new Size(2, 2));
+            dilate(dif, dif, squareKernel);
+        }
+        //save(dif);
+        dif.copyTo(_mat);
+        dif.copyTo(_original_image);
+// threshold the background image so we get dark region
+        /*Mat dark = new Mat();
+        threshold(bg, dark, 0, 255, THRESH_BINARY_INV | THRESH_OTSU);
+        save(dark);
+// extract pixels in the dark region
+        double[][] darkpix = new double[Core.countNonZero(dark)][];
+        int index = 0;
+        for (int r = 0; r < dark.height(); r++) {
+            for (int c = 0; c < dark.width(); c++) {
+                if (_gray.get(r, c) != null) {
+                    darkpix[index++] = _gray.get(r, c);
+                }
+            }
+        }
+// threshold the dark region so we get the darker pixels inside it
+        Mat darkpixMat = new Mat();
+//        darkpixMat.put(0, 0, );
+//        darkpixMat.pu
+        threshold(darkpixMat, darkpixMat, 0, 255, THRESH_BINARY | THRESH_OTSU);
+// paste the extracted darker pixels
+        index = 0;
+        for (int r = 0; r < dark.height(); r++) {
+            for (int c = 0; c < dark.width(); c++) {
+                if (darkpix[index++] != null) {
+                    bw.put(r, c, darkpix[index++]);
+                }
+            }
+        }*/
+
+        return this;
+    }
+
 
 }

@@ -1,5 +1,4 @@
 package com.adcb.ocr.pdf;
-
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -35,7 +34,7 @@ public class SaveImagesFromPdf extends PDFStreamEngine
     public static void main( String[] args ) throws Exception
     {
         SaveImagesFromPdf printer = new SaveImagesFromPdf();
-        String path = "/home/yamraaj/Downloads/";
+        String path = "/home/tempfolder/Downloads/";
         String fname = "Papapassport.pdf";
         printer.extractImage(path, fname);
     }
@@ -74,10 +73,6 @@ public class SaveImagesFromPdf extends PDFStreamEngine
             PDXObject xobject = getResources().getXObject( objectName );
             if( xobject instanceof PDImageXObject){
                 PDImageXObject image = (PDImageXObject)xobject;
-//                int imageWidth = image.getWidth();
-//                int imageHeight = image.getHeight();
-
-                // same image to local
                 BufferedImage bImage = image.getImage();
                 ImageIO.write(bImage,"PNG",new File(imagePath+File.separator+imageName));
                 imageSaved = true;
