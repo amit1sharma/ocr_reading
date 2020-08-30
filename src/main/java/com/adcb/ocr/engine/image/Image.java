@@ -69,6 +69,13 @@ public class Image {
         this.imageAbsoluteTargetPath = tgtPath;
         this.imageName = imageName;
     }
+    public Image cropLowerHalf(){
+        int newHeight = _mat.height()/2;
+        Rect rect = new Rect(0,newHeight,_mat.width(),newHeight);
+        Mat newMat = new Mat(_mat, rect);
+        newMat.copyTo(_mat);
+        return this;
+    }
     public Image gaussianBlur(Size... size){
         Size s = size.length>0?size[0]:new Size(11,11);
         GaussianBlur(this._mat, this._mat, s,0);
